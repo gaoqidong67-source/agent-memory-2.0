@@ -1,0 +1,24 @@
+* text=auto
+
+*.md text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.py text eol=lf
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+*.7z binary
+*.docx binary
+*.jpg binary
+*.jpeg binary
+*.mp4 binary
+*.pdf binary
+*.png binary
+*.pptx binary
+*.psd binary
+*.wav binary
+*.webp binary
+*.xlsx binary
+*.zip binary

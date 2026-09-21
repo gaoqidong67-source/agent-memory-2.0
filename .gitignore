@@ -1,0 +1,104 @@
+# Agent、编辑器与自动化运行态
+.agents/
+.codex/
+.obsidian/
+.playwright-cli/
+.uploads/
+.npm-cache-update-check/
+董事会/
+**/.playwright-cli/
+**/.venv/
+**/node_modules/
+**/site-packages/
+**/__pycache__/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+
+# 浏览器 Profile、登录态与本地凭据
+**/opencli-*-profile*/
+**/User Data/
+**/Login Data*
+**/Web Data*
+**/Cookies*
+**/Local Storage/
+**/IndexedDB/
+.env
+.env.*
+*.pem
+*.pfx
+*.key
+
+# Inbox 原件与隔离区
+Inbox/未处理文件/
+Inbox/已处理文件/
+Inbox/已入库文件/
+Inbox/临时文件/
+
+# 项目历史、生成物与大资产
+project/**/archives/
+project/**/output/
+project/**/outputs/
+
+# 二进制资产保留在磁盘，不进入文本历史
+*.7z
+*.ai
+*.bin
+*.db
+*.doc
+*.docx
+*.exe
+*.gif
+*.jpg
+*.jpeg
+*.m4a
+*.mkv
+*.mov
+*.mp3
+*.mp4
+*.pdf
+*.png
+*.ppt
+*.pptx
+*.psb
+*.psd
+*.rar
+*.sqlite
+*.sqlite3
+*.tar
+*.tif
+*.tiff
+*.wav
+*.webp
+*.xls
+*.xlsx
+*.zip
+
+# OS 系统文件
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE 与编辑器
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 日志与临时文件
+*.log
+*.tmp
+*.bak
+
+# 通用测试产物（防止测试输出泄漏到任何子目录）
+**/test_results/
+**/test_reports/
+**/test_output/
+
+# Python 构建与打包产物
+*.egg-info/
+build/
+dist/
+.ipynb_checkpoints/
