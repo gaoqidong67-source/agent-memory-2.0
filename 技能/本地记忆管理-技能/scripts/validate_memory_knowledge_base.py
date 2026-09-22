@@ -68,6 +68,7 @@ REQUIRED_DIRS = {
 
 ALLOWED_ROOT_FILES = {"README.md", "AGENTS.md", ".gitignore", ".gitattributes"}
 ALLOWED_ROOT_DIRS = {
+    ".github",
     "Inbox",
     "重要记忆",
     "日常记忆",
