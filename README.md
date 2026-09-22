@@ -24,6 +24,8 @@ Agent 先遵循 [AGENTS](AGENTS.md)，普通任务再从 [AI 阅读入口](重�
 python .\技能\本地记忆管理-技能\scripts\validate_memory_knowledge_base.py --root . --strict
 ```
 
+GitHub 中不包含本地 Inbox 队列、季度目录和独立董事会工作区，因此 CI 使用 `--portable --strict` 校验可移植快照。
+
 整理内容时优先更新既有入口和索引，避免为同一事实创建多个来源；二进制交付物通过本地项目目录管理，不写入文本历史。
 
 ## 目录

@@ -66,6 +66,13 @@ REQUIRED_DIRS = {
     "project/已完结项目",
 }
 
+PORTABLE_OPTIONAL_FILES = {
+    "Inbox/临时文件/README.md",
+}
+
+PORTABLE_OPTIONAL_DIRS = set(REQUIRED_DIRS)
+PORTABLE_OPTIONAL_LINK_ROOTS = {"董事会"}
+
 ALLOWED_ROOT_FILES = {"README.md", "AGENTS.md", ".gitignore", ".gitattributes"}
 ALLOWED_ROOT_DIRS = {
     ".github",
@@ -204,7 +211,14 @@ def check_markdown_table(relative: str, text: str, errors: list[str]) -> None:
             )
 
 
-def check_markdown_links(path: Path, root: Path, text: str, errors: list[str]) -> None:
+def check_markdown_links(
+    path: Path,
+    root: Path,
+    text: str,
+    errors: list[str],
+    *,
+    portable: bool = False,
+) -> None:
     without_fences = FENCE_RE.sub("", text)
     for raw_target in MARKDOWN_LINK_RE.findall(without_fences):
         target = raw_target.strip().strip("<>")
@@ -215,11 +229,17 @@ def check_markdown_links(path: Path, root: Path, text: str, errors: list[str]) -
             continue
         resolved = (path.parent / target).resolve()
         try:
-            resolved.relative_to(root)
+            relative_target = resolved.relative_to(root)
         except ValueError:
             errors.append(
                 f"相对链接越出库根 {normalize_relative(path, root)} -> {raw_target}"
             )
+            continue
+        if (
+            portable
+            and relative_target.parts
+            and relative_target.parts[0] in PORTABLE_OPTIONAL_LINK_ROOTS
+        ):
             continue
         if not resolved.exists():
             errors.append(f"断链 {normalize_relative(path, root)} -> {raw_target}")
@@ -265,7 +285,12 @@ def check_project_readmes(root: Path, errors: list[str]) -> None:
                 errors.append(f"项目状态块缺少“{field}”: project/{child.name}/README.md")
 
 
-def validate_memory_root(root: Path, *, strict: bool = False) -> dict[str, object]:
+def validate_memory_root(
+    root: Path,
+    *,
+    strict: bool = False,
+    portable: bool = False,
+) -> dict[str, object]:
     root = root.expanduser().resolve()
     errors: list[str] = []
     warnings: list[str] = []
@@ -278,16 +303,19 @@ def validate_memory_root(root: Path, *, strict: bool = False) -> dict[str, objec
             "ok": False,
             "root": str(root),
             "strict": strict,
+            "portable": portable,
             "errors": [f"目标目录不存在: {root}"],
             "warnings": [],
             "counts": {"files": 0, "markdown": 0},
             "skipped_roots": [],
         }
 
-    for relative in sorted(REQUIRED_FILES):
+    required_files = REQUIRED_FILES - PORTABLE_OPTIONAL_FILES if portable else REQUIRED_FILES
+    required_dirs = REQUIRED_DIRS - PORTABLE_OPTIONAL_DIRS if portable else REQUIRED_DIRS
+    for relative in sorted(required_files):
         if not (root / relative).is_file():
             errors.append(f"缺少必需文件: {relative}")
-    for relative in sorted(REQUIRED_DIRS):
+    for relative in sorted(required_dirs):
         if not (root / relative).is_dir():
             errors.append(f"缺少必需目录: {relative}")
 
@@ -295,7 +323,7 @@ def validate_memory_root(root: Path, *, strict: bool = False) -> dict[str, objec
 
     today = date.today()
     current_quarter = f"{today.year}-{((today.month - 1) // 3) + 1}.0"
-    if not (root / "日常记忆" / current_quarter).is_dir():
+    if not portable and not (root / "日常记忆" / current_quarter).is_dir():
         errors.append(f"缺少当前季度目录: 日常记忆/{current_quarter}")
 
     for item in root.iterdir():
@@ -317,7 +345,7 @@ def validate_memory_root(root: Path, *, strict: bool = False) -> dict[str, objec
         if suffix == ".md":
             markdown_files += 1
             check_markdown_table(relative, text, errors)
-            check_markdown_links(path, root, text, errors)
+            check_markdown_links(path, root, text, errors, portable=portable)
             if path.name == "SKILL.md":
                 check_skill_frontmatter(path, root, text, errors)
         if suffix in first_party_script_suffixes:
@@ -346,6 +374,7 @@ def validate_memory_root(root: Path, *, strict: bool = False) -> dict[str, objec
         "ok": ok,
         "root": str(root),
         "strict": strict,
+        "portable": portable,
         "errors": errors,
         "warnings": warnings,
         "counts": {"files": scanned_files, "markdown": markdown_files},
@@ -358,13 +387,22 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Validate an Agent Memory 2.0 knowledge base.")
     parser.add_argument("--root", default=str(inferred_root), help="Agent Memory root.")
     parser.add_argument("--strict", action="store_true", help="Treat warnings as failure.")
+    parser.add_argument(
+        "--portable",
+        action="store_true",
+        help="Validate the Git-portable snapshot without local-only directories.",
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     configure_utf8_output()
     args = parse_args()
-    result = validate_memory_root(Path(args.root), strict=args.strict)
+    result = validate_memory_root(
+        Path(args.root),
+        strict=args.strict,
+        portable=args.portable,
+    )
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0 if result["ok"] else 1
 
